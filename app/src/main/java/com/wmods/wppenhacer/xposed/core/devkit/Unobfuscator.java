@@ -1933,6 +1933,17 @@ public class Unobfuscator {
         return UnobfuscatorCache.getInstance().getClass(classLoader, () -> findFirstClassUsingStrings(classLoader, StringMatchType.Contains, "Report tab open only once per session"));
     }
 
+    public static Method[] loadUserIsBlockedMethods(ClassLoader classLoader) throws Exception {
+        return UnobfuscatorCache.getInstance().getMethods(classLoader, () -> {
+           var method1 = findFirstMethodUsingStrings(classLoader, StringMatchType.Contains, "VerifyPhoneNumber/userIsBlocked");
+           if (method1 == null) throw new Exception("Method userIsBlocked not found");
+           var temp = dexkit.getMethodData(method1);
+           var method2 = temp.getCallers().firstOrNull(m -> m.getParamCount() == 2 && m.getParamTypes().get(0).equals(temp.getParamTypes().get(0)));
+           if (method2 == null) throw new Exception("Method userIsBlocked 2 not found");
+           return new Method[] {method1, method2.getMethodInstance(classLoader)};
+        });
+    }
+
     public static Method loadTcTokenMethod(ClassLoader classLoader) throws Exception {
         return UnobfuscatorCache.getInstance().getMethod(classLoader, () -> findFirstMethodUsingStrings(classLoader, StringMatchType.Contains, "GET_RECEIVED_TOKEN_AND_TIMESTAMP_BY_JID"));
     }

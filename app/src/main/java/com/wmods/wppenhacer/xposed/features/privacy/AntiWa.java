@@ -28,6 +28,11 @@ public class AntiWa extends Feature {
             logDebug("Root", detector);
             XposedBridge.hookMethod(detector, XC_MethodReplacement.returnConstant(false));
         }
+        var userBlockMethods = Unobfuscator.loadUserIsBlockedMethods(classLoader);
+        for (var method : userBlockMethods) {
+            logDebug("User blocker", method);
+            XposedBridge.hookMethod(method, XC_MethodReplacement.returnConstant(null));
+        }
         var settingsGetInt = Settings.Global.class.getDeclaredMethod("getInt", ContentResolver.class, String.class, int.class);
         logDebug("Adb", settingsGetInt);
         XposedBridge.hookMethod(settingsGetInt, new XC_MethodHook() {
